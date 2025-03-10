@@ -7,18 +7,18 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+AbendSimulatorClient/node_modules
+AbendSimulatorClient/dist
+AbendSimulatorClient/dist-ssr
+AbendSimulatorClient/*.local
 
 # Editor directories and files
-.vscode/*
+AbendSimulatorClient/.vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+AbendSimulatorClient/.idea
+AbendSimulatorClient/.DS_Store
+AbendSimulatorClient/*.suo
+AbendSimulatorClient/*.ntvs*
+AbendSimulatorClient/*.njsproj
+AbendSimulatorClient/*.sln
+AbendSimulatorClient/*.sw?
