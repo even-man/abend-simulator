@@ -5,55 +5,63 @@ import SessionScreen from "./SessionScreen.vue"
 import CMGRScreen from "./CMGRScreen.vue"
 import TSOScreen from "./TSOScreen.vue"
 import AbendForYou from "./AbendForYou.vue"
-import {ref} from "vue"
+import CICSScreen from "./CICSScreen.vue"
+import TerminalFooter from "./TerminalFooter.vue"
+import HelpScreen from "./HelpScreen.vue"
+import {ref, computed} from "vue"
 
 // KEY HANDLERS
+// this is cursed
 
-document.addEventListener('keydown', function(event) {
-  switch (event.key) {
-    case "Enter":
-        if (dialogOpen.value && goodScreenClose.value) {
-            dialogOpen.value = false;
-        } else {
-            handleEnterKey();
-        }
-        break;
-    case "F3":
+document.addEventListener("keydown", function(event: KeyboardEvent) {
+    if (event.key === "F3") {
         backCommand();
-        event.preventDefault()
-        break;
-
-    default:
-        break;
-  }
-});
+        event.preventDefault();
+    }
+})
 
 function handleEnterKey() {
-    if (state.value.command != "") {
-        switch (state.value.command.toUpperCase()) {
-            case "BACK":
-                backCommand();
-                break;
-            case "HELP":
-                // open help screen
-                break;
-            default:
-                // show error
-                break;
-        }
-    } else {
-        state.value.sessions.forEach(session => {
-            if (session.sessionSelector.toUpperCase() === 'S') {
-                state.value.navStack.push(session.sessionName)
-            }
-        })
+    switch (state.value.command.toUpperCase()) {
+        case "BACK":
+            backCommand();
+            break;
+        case "HELP":
+            helpOpen.value = true;
+            break;
+        default:
+            // show error
+            break;
     }
 }
 
 function backCommand() {
     if (state.value.navStack.length > 1) {
         state.value.navStack = state.value.navStack.slice(0, state.value.navStack.length - 1)
+        message.value = ""
     }
+}
+
+function handleCommandEnter(e: KeyboardEvent) {
+    switch (e.key) {
+        case "Enter":
+            handleEnterKey();
+            break;
+        case "F3":
+            backCommand();
+            e.preventDefault()
+            break;
+
+        default:
+            break;
+    }
+}
+function handleSessionEnter() {
+    state.value.sessions.forEach(session => {
+            if (session.sessionSelector.toUpperCase() === 'S') {
+                state.value.navStack.push(session.sessionName)
+                message.value = "";
+            }
+        })
 }
 
 // STATE OBJECT
@@ -170,26 +178,62 @@ function addAbendLog() {
         let date = new Date();   
         state.value.logs.push(`>${date} @ ${trans.region} ${trans.transId} ${message} `)
         state.value.transactions.filter(transaction => trans.transId === transaction.transId)[0].status = "DOWN";
+        totalAbends.value++;
         dialogOpen.value = true;
+
     } 
 }
 
 function randomLog() {
     let trans = state.value.transactions[Math.floor(Math.random() * state.value.transactions.length)]
-    let message = logMessages[Math.floor(Math.random() * logMessages.length)]
+    let logMessage = logMessages[Math.floor(Math.random() * logMessages.length)]
     let date = new Date();
-    state.value.logs.push(`>${date} ${trans.region} ${trans.transId} ${message} `)
+    state.value.logs.push(`>${date} ${trans.region} ${trans.transId} ${logMessage} `)
 }
 
 // I have an ABEND for you, sending it your way...
 
 const dialogOpen = ref(false);
-const goodScreenClose = ref(false);
+
+// transaction starting
+
+function goodTransStart(transId: string) {
+    state.value.transactions.filter(trans => trans.transId === transId)[0].status = "UP";
+    let logMessage = "Started transaction"
+    let date = new Date();
+    state.value.logs.push(`>${date} ${state.value.transactions.filter(trans => trans.transId === transId)[0].region} ${transId} ${logMessage} `)
+    message.value = "Transaction started"
+    totalAbendsFixed.value++;
+}
+function badTransStart() {
+    message.value = "Transaction not found in region"
+}
+
+// messages
+const message = ref("");
+const totalAbends = ref(0);
+const totalAbendsFixed = ref(0);
+const shareholderValue = computed(() => {
+    return `$${(totalAbendsFixed.value * 1000) - (totalAbends.value - totalAbendsFixed.value) * 500}`
+})
+const width = computed(() => {
+    if (typeof window !== undefined) {
+        return window.innerWidth
+    } else {
+        return 0;
+    }
+})
+
+// HELP dialog
+const helpOpen = ref(false);
+
 
 // TIMERS
 
 setInterval(function() {
-    addAbendLog();
+    if (!helpOpen.value) {
+        addAbendLog();
+    }
 }, 20000)
 setInterval(function() {
     randomLog();
@@ -198,17 +242,36 @@ setInterval(function() {
 </script>
 
 <template>
-  
-    <div class="terminal">
-        <terminal-header title="z/OS SuperSession"></terminal-header>
-        
-        <terminal-text class="command-margin" v-model="state.command" label="Command" inputWidth="40">
-        </terminal-text>
-        <session-screen v-if="state.navStack[state.navStack.length - 1] === 'SESSIONSCREEN'" :state="state"></session-screen>
-        <CMGRScreen v-if="state.navStack[state.navStack.length - 1] === 'CMGR'" :state="state"></CMGRScreen>
-        <TSOScreen v-if="state.navStack[state.navStack.length - 1] === 'TSO'" :state="state"></TSOScreen>
-        <AbendForYou @close="goodScreenClose = true;" @bad-close="goodScreenClose = false;" :open="dialogOpen"></AbendForYou>
+    <div v-if="width > 1100">
+        <div style="display: flex;">
+            Total Abends: {{ totalAbends }}
+            |
+            Abends Fixed: {{ totalAbendsFixed }}
+            |
+            Shareholder Value: {{ shareholderValue }}
+            <div style="margin-left: auto;">
+                Stuck? Try typing help on the COMMAND line and pressing enter.
+            </div>
+        </div>
+        <div class="terminal">
+            <terminal-header title="z/OS SuperSession"></terminal-header>
+            
+            <terminal-text @keydown.exact.enter="handleCommandEnter" class="command-margin" v-model="state.command" label="Command" :inputWidth="40">
+            </terminal-text>
+            <session-screen @enter-pressed="handleSessionEnter" v-if="state.navStack[state.navStack.length - 1] === 'SESSIONSCREEN'" :state="state"></session-screen>
+            <CMGRScreen v-if="state.navStack[state.navStack.length - 1] === 'CMGR'" :state="state"></CMGRScreen>
+            <TSOScreen v-if="state.navStack[state.navStack.length - 1] === 'TSO'" :state="state"></TSOScreen>
+            <CICSScreen @good-start="goodTransStart" @bad-start="badTransStart" v-if="['C1', 'C2', 'C3'].includes(state.navStack[state.navStack.length - 1])" :region="state.navStack[state.navStack.length - 1]" :state="state"></CICSScreen>
+            <AbendForYou @close="dialogOpen = false;" :open="dialogOpen"></AbendForYou>
+            <HelpScreen @close="helpOpen = false" :open="helpOpen"></HelpScreen>
+            <TerminalFooter class="footer" :message="message"></TerminalFooter>
+        </div>
     </div>
+    <div v-else>
+        You think you can use a mainframe on a mobile phone? Think again. This is real computing buster. Try again on a monitor.
+    </div>
+
+    
 
 </template>
 
@@ -228,5 +291,8 @@ setInterval(function() {
         max-width: 50%;
         margin-top: 2rem;
         margin-left: 25%;
+    }
+    .footer {
+        margin-top: auto;
     }
 </style>

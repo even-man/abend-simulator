@@ -19,7 +19,8 @@ function closeDialog() {
 
 <template>
     <div v-if="props.open" class="dialog">
-        <div>I have an ABEND for you, sending it your way...</div>
+        <p>Navigate the mainframe by placing cursor on text fields, typing S to select the option, and then pressing enter. F3 can be used to navigate backwards.</p>
+        <p>Squash abends to generate shareholder value. Check out some of the sessions, and you might find them useful.</p>
         <div style="margin-top: auto; margin-bottom: 1rem;">
             <terminal-text @keydown.exact.enter="closeDialog" v-model="close" label="Close" :inputWidth="1"></terminal-text>
         </div>
@@ -32,9 +33,9 @@ function closeDialog() {
     border: 1px solid rgba(51, 255, 0, 0.87);
     background-color: black;
     width: 30%;
-    height: 30%;
+    height: 60%;
     position: fixed;
-    top: 30%;
+    top: 20%;
     left: 35%;
     text-align: center;
     display: flex;

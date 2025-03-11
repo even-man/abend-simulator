@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import TerminalText from "./TerminalText.vue"
+import type { State } from "../utilities/types";
 import {ref, computed, defineProps} from "vue"
 
 const props = defineProps<{
-    state: Object
+    state: State
 }>();
 
 </script>
