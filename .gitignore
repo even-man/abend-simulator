@@ -8,7 +8,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 AbendSimulatorClient/node_modules
-AbendSimulatorClient/dist
+# AbendSimulatorClient/dist
 AbendSimulatorClient/dist-ssr
 AbendSimulatorClient/*.local
 
