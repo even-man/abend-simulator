@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { State } from "../utilities/types";
-import {ref, computed, defineProps} from "vue"
+import {defineProps} from "vue"
 
 const props = defineProps<{
     state: State
