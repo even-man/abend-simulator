@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import type {State} from '../utilities/types';
 
 defineProps<{
-    state: Object
+    state: State
 }>();
 
 </script>
