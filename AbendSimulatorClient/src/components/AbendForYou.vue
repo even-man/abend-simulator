@@ -3,7 +3,7 @@ import {ref, defineEmits} from "vue"
 import TerminalText from "./TerminalText.vue"
 
 const props = defineProps<{
-    open: Boolean
+    open: boolean
 }>();
 
 const emit = defineEmits(["close"]);
@@ -21,7 +21,7 @@ function closeDialog() {
     <div v-if="props.open" class="dialog">
         <div>I have an ABEND for you, sending it your way...</div>
         <div style="margin-top: auto; margin-bottom: 1rem;">
-            <terminal-text @keydown.exact.enter="closeDialog" v-model="close" label="Close" :inputWidth="1"></terminal-text>
+            <terminal-text @keydown.exact.enter="closeDialog" v-model="close" label="Close" :inputWidth="1" :force-focus="props.open"></terminal-text>
         </div>
     </div>
 </template>

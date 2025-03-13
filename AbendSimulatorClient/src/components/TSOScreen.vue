@@ -19,7 +19,7 @@ const props = defineProps<{
         </thead>
         <tbody>
             <tr v-for="log in props.state.logs.slice(-15)">
-                <td class="font-blue">{{log}}</td>
+                <td :class="log.includes('@') ? 'font-red' : 'font-blue'">{{log}}</td>
             </tr>
         </tbody>
     </table>

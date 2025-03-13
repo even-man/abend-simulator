@@ -13,10 +13,18 @@ const emits = defineEmits(["badStart", "goodStart"])
 const transToStart = ref("");
 
 function attemptStartTrans() {
-    if (props.state.transactions.filter(trans => trans.transId === transToStart.value && trans.region === props.region).length === 1) {
-        emits("goodStart", transToStart.value);
+    transToStart.value = transToStart.value.toUpperCase();
+    let targetTrans = props.state.transactions.filter(trans => trans.transId === transToStart.value && trans.region === props.region);
+    // value in region
+    if (targetTrans.length === 1) {
+        if (targetTrans[0].status === "UP") {
+            emits("badStart", "Transaction already up");
+        } else {
+            emits("goodStart", transToStart.value.toUpperCase());
+        }
+        
     } else {
-        emits("badStart");
+        emits("badStart", "Transaction not found in region");
     }
 }
 
@@ -24,7 +32,8 @@ function attemptStartTrans() {
 
 <template>
     <div class="container">
-        <terminal-text @keyup.exact.enter="attemptStartTrans()" v-model="transToStart" label="Start Transaction" :inputWidth="4"></terminal-text>
+        <p>region {{ props.region }}</p>
+        <terminal-text @keyup.exact.enter="attemptStartTrans()" v-model="transToStart" label="Start Transaction" :inputWidth="4" :force-focus="false"></terminal-text>
     </div>
 </template>
 

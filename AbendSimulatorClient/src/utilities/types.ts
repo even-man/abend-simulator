@@ -1,7 +1,8 @@
 export interface Transaction {
     transId: string,
     region: string,
-    status: string
+    status: string,
+    desc: string
 }
 
 export interface Session {
