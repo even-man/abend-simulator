@@ -8,7 +8,7 @@ import AbendForYou from "./AbendForYou.vue"
 import CICSScreen from "./CICSScreen.vue"
 import TerminalFooter from "./TerminalFooter.vue"
 import HelpScreen from "./HelpScreen.vue"
-import {ref, computed} from "vue"
+import {ref, computed, watch} from "vue"
 
 // KEY HANDLERS
 // this is cursed
@@ -105,50 +105,59 @@ const state = ref({
         {
             transId: "RU20",
             region: "C1",
-            status: "UP"
+            status: "UP",
+            desc: "Main value generator"
         },
         {
             transId: "RU19",
             region: "C1",
-            status: "UP"
+            status: "UP",
+            desc: "Employee satisfaction analyzer"
         },
         {
             transId: "RW72",
             region: "C1",
-            status: "UP"
+            status: "UP",
+            desc: "Price maximizer"
         },
         {
             transId: "RF80",
             region: "C2",
-            status: "UP"
+            status: "UP",
+            desc: "Number cruncher"
         },
         {
             transId: "FR45",
             region: "C2",
-            status: "UP"
+            status: "UP",
+            desc: "Corporate espionage management"
         },
         {
             transId: "RC76",
             region: "C2",
-            status: "UP"
+            status: "UP",
+            desc: "Abend Simulator Abend fixer"
         },
         {
             transId: "RU10",
             region: "C3",
-            status: "UP"
+            status: "UP",
+            desc: "Priority Optimization Organizational Program"
         },
         {
             transId: "RF78",
             region: "C3",
-            status: "UP"
+            status: "UP",
+            desc: "Waste Finder"
         },
         {
             transId: "KR76",
             region: "C3",
-            status: "UP"
+            status: "UP",
+            desc: "Productivity Portal"
         },
     ],
-    logs: ["apsddddddddddddddddddddd"]
+    logs: [""]
 })
 
 // LOG GENERATION
@@ -205,8 +214,9 @@ function goodTransStart(transId: string) {
     message.value = "Transaction started"
     totalAbendsFixed.value++;
 }
-function badTransStart() {
-    message.value = "Transaction not found in region"
+function badTransStart(errorMessage: string) {
+    console.log(errorMessage);
+    message.value = errorMessage;
 }
 
 // messages
@@ -225,16 +235,26 @@ const width = computed(() => {
 })
 
 // HELP dialog
-const helpOpen = ref(false);
+const helpOpen = ref(true);
 
 
 // TIMERS
+const speed = ref(30);
 
-setInterval(function() {
-    if (!helpOpen.value) {
-        addAbendLog();
-    }
-}, 20000)
+watch(speed, () => {
+    clearInterval(addAbendTimer);
+    addAbendTimer = setInterval(function() {
+                    if (!helpOpen.value) {
+                        addAbendLog();
+                    }
+                }, speed.value * 1000)
+})
+
+let addAbendTimer = setInterval(function() {
+                    if (!helpOpen.value) {
+                        addAbendLog();
+                    }
+                }, speed.value * 1000)
 setInterval(function() {
     randomLog();
 }, 5000)
@@ -245,10 +265,22 @@ setInterval(function() {
     <div v-if="width > 1100">
         <div style="display: flex;">
             Total Abends: {{ totalAbends }}
-            |
+            <span class="font-red" style="margin-left: .5rem; margin-right: .5rem;">||</span>
             Abends Fixed: {{ totalAbendsFixed }}
-            |
+            <span class="font-red" style="margin-left: .5rem; margin-right: .5rem;">||</span>
             Shareholder Value: {{ shareholderValue }}
+            <span class="font-red" style="margin-left: .5rem; margin-right: .5rem;">||</span>
+            <label for="abendSpeed">1 abend every {{ speed }} sec</label>
+            <input 
+             v-model="speed"
+             class="input-range"
+             type="range"
+             min="5"
+             max="60"
+             step="1"
+             value="30"
+             name="abendSpeed"
+             >
             <div style="margin-left: auto;">
                 Stuck? Try typing help on the COMMAND line and pressing enter.
             </div>
@@ -256,7 +288,7 @@ setInterval(function() {
         <div class="terminal">
             <terminal-header title="z/OS SuperSession"></terminal-header>
             
-            <terminal-text @keydown.exact.enter="handleCommandEnter" class="command-margin" v-model="state.command" label="Command" :inputWidth="40">
+            <terminal-text @keydown.exact.enter="handleCommandEnter" class="command-margin" v-model="state.command" label="Command" :inputWidth="40" :force-focus="false">
             </terminal-text>
             <session-screen @enter-pressed="handleSessionEnter" v-if="state.navStack[state.navStack.length - 1] === 'SESSIONSCREEN'" :state="state"></session-screen>
             <CMGRScreen v-if="state.navStack[state.navStack.length - 1] === 'CMGR'" :state="state"></CMGRScreen>
@@ -268,10 +300,8 @@ setInterval(function() {
         </div>
     </div>
     <div v-else>
-        You think you can use a mainframe on a mobile phone? Think again. This is real computing buster. Try again on a monitor.
+        You think you can use a mainframe on a mobile phone? Think again. This is *real* computing. Try again on a monitor.
     </div>
-
-    
 
 </template>
 
@@ -279,7 +309,7 @@ setInterval(function() {
 
     .command-margin {
         margin-top: 1rem;
-        margin-left: 8%;
+        margin-left: 1rem;
         margin-bottom: 1rem;
     }
 
@@ -288,11 +318,13 @@ setInterval(function() {
         display: flex;
         flex-direction: column;
         height: 80vh;
-        max-width: 50%;
-        margin-top: 2rem;
-        margin-left: 25%;
+        margin-top: 1rem;
     }
     .footer {
         margin-top: auto;
+    }
+    .input-range {
+        accent-color: rgba(51, 255, 0, 0.87);
+        background-color: black;
     }
 </style>

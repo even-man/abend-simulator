@@ -1,9 +1,17 @@
 <script setup lang="ts">
+import { onMounted, ref } from 'vue';
 
-defineProps<{
+onMounted(() => {
+    if (props.forceFocus) {
+        document.getElementById(inputId)?.focus();
+    }
+})
+const inputId = (Math.random()*1000).toString()
+const props = defineProps<{
     modelValue: string,
     label: string,
-    inputWidth: number
+    inputWidth: number,
+    forceFocus: boolean
 }>();
 
 </script>
@@ -11,14 +19,14 @@ defineProps<{
 <template>
   
     <div class="container">
-        {{ label + " ==>"  }}
+        {{ props.label + " ==>"  }}
         <!-- Place Input Here -->
-        <input :value="modelValue"
+        <input :id="inputId" :value="props.modelValue"
                @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
                @blur="$emit('update:modelValue', '')"
-               :maxlength="inputWidth"
+               :maxlength="props.inputWidth"
                 type="text"
-                :style="'width: ' + (inputWidth / 2).toString() + 'rem'"
+                :style="'width: ' + (props.inputWidth / 2).toString() + 'rem'"
         >
         
     </div>

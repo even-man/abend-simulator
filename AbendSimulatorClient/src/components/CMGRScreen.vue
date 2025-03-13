@@ -14,16 +14,16 @@ defineProps<{
             <tr>
                 <th>Trans ID</th>
                 <th>Region</th>
-                <th></th>
                 <th>Status</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
             <tr v-for="trans in state.transactions">
                 <td>{{ trans.transId }}</td>
                 <td>{{ trans.region }}</td>
-                <td class="font-blue">aspdkgjaaswdkgj</td>
                 <td :class="trans.status === 'UP' ? 'font-white' : 'font-red'">{{ trans.status }}</td>
+                <td class="font-blue">{{ trans.desc }}</td>
             </tr>
         </tbody>
     </table>
